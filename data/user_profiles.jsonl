@@ -1,0 +1,100 @@
+{"profile_id": "u0000", "identity": "college student", "interest": "automotive", "identity_idx": 0, "interest_idx": 0}
+{"profile_id": "u0001", "identity": "college student", "interest": "consumer electronics", "identity_idx": 0, "interest_idx": 1}
+{"profile_id": "u0002", "identity": "college student", "interest": "home improvement", "identity_idx": 0, "interest_idx": 2}
+{"profile_id": "u0003", "identity": "college student", "interest": "personal finance", "identity_idx": 0, "interest_idx": 3}
+{"profile_id": "u0004", "identity": "college student", "interest": "outdoor recreation", "identity_idx": 0, "interest_idx": 4}
+{"profile_id": "u0005", "identity": "college student", "interest": "health and wellness", "identity_idx": 0, "interest_idx": 5}
+{"profile_id": "u0006", "identity": "college student", "interest": "online learning", "identity_idx": 0, "interest_idx": 6}
+{"profile_id": "u0007", "identity": "college student", "interest": "fashion and grooming", "identity_idx": 0, "interest_idx": 7}
+{"profile_id": "u0008", "identity": "college student", "interest": "food and cooking", "identity_idx": 0, "interest_idx": 8}
+{"profile_id": "u0009", "identity": "college student", "interest": "travel planning", "identity_idx": 0, "interest_idx": 9}
+{"profile_id": "u0010", "identity": "new parent", "interest": "automotive", "identity_idx": 1, "interest_idx": 0}
+{"profile_id": "u0011", "identity": "new parent", "interest": "consumer electronics", "identity_idx": 1, "interest_idx": 1}
+{"profile_id": "u0012", "identity": "new parent", "interest": "home improvement", "identity_idx": 1, "interest_idx": 2}
+{"profile_id": "u0013", "identity": "new parent", "interest": "personal finance", "identity_idx": 1, "interest_idx": 3}
+{"profile_id": "u0014", "identity": "new parent", "interest": "outdoor recreation", "identity_idx": 1, "interest_idx": 4}
+{"profile_id": "u0015", "identity": "new parent", "interest": "health and wellness", "identity_idx": 1, "interest_idx": 5}
+{"profile_id": "u0016", "identity": "new parent", "interest": "online learning", "identity_idx": 1, "interest_idx": 6}
+{"profile_id": "u0017", "identity": "new parent", "interest": "fashion and grooming", "identity_idx": 1, "interest_idx": 7}
+{"profile_id": "u0018", "identity": "new parent", "interest": "food and cooking", "identity_idx": 1, "interest_idx": 8}
+{"profile_id": "u0019", "identity": "new parent", "interest": "travel planning", "identity_idx": 1, "interest_idx": 9}
+{"profile_id": "u0020", "identity": "software engineer", "interest": "automotive", "identity_idx": 2, "interest_idx": 0}
+{"profile_id": "u0021", "identity": "software engineer", "interest": "consumer electronics", "identity_idx": 2, "interest_idx": 1}
+{"profile_id": "u0022", "identity": "software engineer", "interest": "home improvement", "identity_idx": 2, "interest_idx": 2}
+{"profile_id": "u0023", "identity": "software engineer", "interest": "personal finance", "identity_idx": 2, "interest_idx": 3}
+{"profile_id": "u0024", "identity": "software engineer", "interest": "outdoor recreation", "identity_idx": 2, "interest_idx": 4}
+{"profile_id": "u0025", "identity": "software engineer", "interest": "health and wellness", "identity_idx": 2, "interest_idx": 5}
+{"profile_id": "u0026", "identity": "software engineer", "interest": "online learning", "identity_idx": 2, "interest_idx": 6}
+{"profile_id": "u0027", "identity": "software engineer", "interest": "fashion and grooming", "identity_idx": 2, "interest_idx": 7}
+{"profile_id": "u0028", "identity": "software engineer", "interest": "food and cooking", "identity_idx": 2, "interest_idx": 8}
+{"profile_id": "u0029", "identity": "software engineer", "interest": "travel planning", "identity_idx": 2, "interest_idx": 9}
+{"profile_id": "u0030", "identity": "small business owner", "interest": "automotive", "identity_idx": 3, "interest_idx": 0}
+{"profile_id": "u0031", "identity": "small business owner", "interest": "consumer electronics", "identity_idx": 3, "interest_idx": 1}
+{"profile_id": "u0032", "identity": "small business owner", "interest": "home improvement", "identity_idx": 3, "interest_idx": 2}
+{"profile_id": "u0033", "identity": "small business owner", "interest": "personal finance", "identity_idx": 3, "interest_idx": 3}
+{"profile_id": "u0034", "identity": "small business owner", "interest": "outdoor recreation", "identity_idx": 3, "interest_idx": 4}
+{"profile_id": "u0035", "identity": "small business owner", "interest": "health and wellness", "identity_idx": 3, "interest_idx": 5}
+{"profile_id": "u0036", "identity": "small business owner", "interest": "online learning", "identity_idx": 3, "interest_idx": 6}
+{"profile_id": "u0037", "identity": "small business owner", "interest": "fashion and grooming", "identity_idx": 3, "interest_idx": 7}
+{"profile_id": "u0038", "identity": "small business owner", "interest": "food and cooking", "identity_idx": 3, "interest_idx": 8}
+{"profile_id": "u0039", "identity": "small business owner", "interest": "travel planning", "identity_idx": 3, "interest_idx": 9}
+{"profile_id": "u0040", "identity": "retired teacher", "interest": "automotive", "identity_idx": 4, "interest_idx": 0}
+{"profile_id": "u0041", "identity": "retired teacher", "interest": "consumer electronics", "identity_idx": 4, "interest_idx": 1}
+{"profile_id": "u0042", "identity": "retired teacher", "interest": "home improvement", "identity_idx": 4, "interest_idx": 2}
+{"profile_id": "u0043", "identity": "retired teacher", "interest": "personal finance", "identity_idx": 4, "interest_idx": 3}
+{"profile_id": "u0044", "identity": "retired teacher", "interest": "outdoor recreation", "identity_idx": 4, "interest_idx": 4}
+{"profile_id": "u0045", "identity": "retired teacher", "interest": "health and wellness", "identity_idx": 4, "interest_idx": 5}
+{"profile_id": "u0046", "identity": "retired teacher", "interest": "online learning", "identity_idx": 4, "interest_idx": 6}
+{"profile_id": "u0047", "identity": "retired teacher", "interest": "fashion and grooming", "identity_idx": 4, "interest_idx": 7}
+{"profile_id": "u0048", "identity": "retired teacher", "interest": "food and cooking", "identity_idx": 4, "interest_idx": 8}
+{"profile_id": "u0049", "identity": "retired teacher", "interest": "travel planning", "identity_idx": 4, "interest_idx": 9}
+{"profile_id": "u0050", "identity": "fitness beginner", "interest": "automotive", "identity_idx": 5, "interest_idx": 0}
+{"profile_id": "u0051", "identity": "fitness beginner", "interest": "consumer electronics", "identity_idx": 5, "interest_idx": 1}
+{"profile_id": "u0052", "identity": "fitness beginner", "interest": "home improvement", "identity_idx": 5, "interest_idx": 2}
+{"profile_id": "u0053", "identity": "fitness beginner", "interest": "personal finance", "identity_idx": 5, "interest_idx": 3}
+{"profile_id": "u0054", "identity": "fitness beginner", "interest": "outdoor recreation", "identity_idx": 5, "interest_idx": 4}
+{"profile_id": "u0055", "identity": "fitness beginner", "interest": "health and wellness", "identity_idx": 5, "interest_idx": 5}
+{"profile_id": "u0056", "identity": "fitness beginner", "interest": "online learning", "identity_idx": 5, "interest_idx": 6}
+{"profile_id": "u0057", "identity": "fitness beginner", "interest": "fashion and grooming", "identity_idx": 5, "interest_idx": 7}
+{"profile_id": "u0058", "identity": "fitness beginner", "interest": "food and cooking", "identity_idx": 5, "interest_idx": 8}
+{"profile_id": "u0059", "identity": "fitness beginner", "interest": "travel planning", "identity_idx": 5, "interest_idx": 9}
+{"profile_id": "u0060", "identity": "frequent traveler", "interest": "automotive", "identity_idx": 6, "interest_idx": 0}
+{"profile_id": "u0061", "identity": "frequent traveler", "interest": "consumer electronics", "identity_idx": 6, "interest_idx": 1}
+{"profile_id": "u0062", "identity": "frequent traveler", "interest": "home improvement", "identity_idx": 6, "interest_idx": 2}
+{"profile_id": "u0063", "identity": "frequent traveler", "interest": "personal finance", "identity_idx": 6, "interest_idx": 3}
+{"profile_id": "u0064", "identity": "frequent traveler", "interest": "outdoor recreation", "identity_idx": 6, "interest_idx": 4}
+{"profile_id": "u0065", "identity": "frequent traveler", "interest": "health and wellness", "identity_idx": 6, "interest_idx": 5}
+{"profile_id": "u0066", "identity": "frequent traveler", "interest": "online learning", "identity_idx": 6, "interest_idx": 6}
+{"profile_id": "u0067", "identity": "frequent traveler", "interest": "fashion and grooming", "identity_idx": 6, "interest_idx": 7}
+{"profile_id": "u0068", "identity": "frequent traveler", "interest": "food and cooking", "identity_idx": 6, "interest_idx": 8}
+{"profile_id": "u0069", "identity": "frequent traveler", "interest": "travel planning", "identity_idx": 6, "interest_idx": 9}
+{"profile_id": "u0070", "identity": "budget-conscious shopper", "interest": "automotive", "identity_idx": 7, "interest_idx": 0}
+{"profile_id": "u0071", "identity": "budget-conscious shopper", "interest": "consumer electronics", "identity_idx": 7, "interest_idx": 1}
+{"profile_id": "u0072", "identity": "budget-conscious shopper", "interest": "home improvement", "identity_idx": 7, "interest_idx": 2}
+{"profile_id": "u0073", "identity": "budget-conscious shopper", "interest": "personal finance", "identity_idx": 7, "interest_idx": 3}
+{"profile_id": "u0074", "identity": "budget-conscious shopper", "interest": "outdoor recreation", "identity_idx": 7, "interest_idx": 4}
+{"profile_id": "u0075", "identity": "budget-conscious shopper", "interest": "health and wellness", "identity_idx": 7, "interest_idx": 5}
+{"profile_id": "u0076", "identity": "budget-conscious shopper", "interest": "online learning", "identity_idx": 7, "interest_idx": 6}
+{"profile_id": "u0077", "identity": "budget-conscious shopper", "interest": "fashion and grooming", "identity_idx": 7, "interest_idx": 7}
+{"profile_id": "u0078", "identity": "budget-conscious shopper", "interest": "food and cooking", "identity_idx": 7, "interest_idx": 8}
+{"profile_id": "u0079", "identity": "budget-conscious shopper", "interest": "travel planning", "identity_idx": 7, "interest_idx": 9}
+{"profile_id": "u0080", "identity": "home cook", "interest": "automotive", "identity_idx": 8, "interest_idx": 0}
+{"profile_id": "u0081", "identity": "home cook", "interest": "consumer electronics", "identity_idx": 8, "interest_idx": 1}
+{"profile_id": "u0082", "identity": "home cook", "interest": "home improvement", "identity_idx": 8, "interest_idx": 2}
+{"profile_id": "u0083", "identity": "home cook", "interest": "personal finance", "identity_idx": 8, "interest_idx": 3}
+{"profile_id": "u0084", "identity": "home cook", "interest": "outdoor recreation", "identity_idx": 8, "interest_idx": 4}
+{"profile_id": "u0085", "identity": "home cook", "interest": "health and wellness", "identity_idx": 8, "interest_idx": 5}
+{"profile_id": "u0086", "identity": "home cook", "interest": "online learning", "identity_idx": 8, "interest_idx": 6}
+{"profile_id": "u0087", "identity": "home cook", "interest": "fashion and grooming", "identity_idx": 8, "interest_idx": 7}
+{"profile_id": "u0088", "identity": "home cook", "interest": "food and cooking", "identity_idx": 8, "interest_idx": 8}
+{"profile_id": "u0089", "identity": "home cook", "interest": "travel planning", "identity_idx": 8, "interest_idx": 9}
+{"profile_id": "u0090", "identity": "city commuter", "interest": "automotive", "identity_idx": 9, "interest_idx": 0}
+{"profile_id": "u0091", "identity": "city commuter", "interest": "consumer electronics", "identity_idx": 9, "interest_idx": 1}
+{"profile_id": "u0092", "identity": "city commuter", "interest": "home improvement", "identity_idx": 9, "interest_idx": 2}
+{"profile_id": "u0093", "identity": "city commuter", "interest": "personal finance", "identity_idx": 9, "interest_idx": 3}
+{"profile_id": "u0094", "identity": "city commuter", "interest": "outdoor recreation", "identity_idx": 9, "interest_idx": 4}
+{"profile_id": "u0095", "identity": "city commuter", "interest": "health and wellness", "identity_idx": 9, "interest_idx": 5}
+{"profile_id": "u0096", "identity": "city commuter", "interest": "online learning", "identity_idx": 9, "interest_idx": 6}
+{"profile_id": "u0097", "identity": "city commuter", "interest": "fashion and grooming", "identity_idx": 9, "interest_idx": 7}
+{"profile_id": "u0098", "identity": "city commuter", "interest": "food and cooking", "identity_idx": 9, "interest_idx": 8}
+{"profile_id": "u0099", "identity": "city commuter", "interest": "travel planning", "identity_idx": 9, "interest_idx": 9}

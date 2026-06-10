@@ -1,0 +1,29 @@
+supported_models:
+  # ---- API ----
+  Qwen3.6-35B-A3B-model1:
+    model: /mnt/model/ckpts/Qwen3.6-35B-A3B
+    engine: vllm
+    base_url: http://localhost:8000
+    api_key: <API_KEY>
+
+  Qwen3.6-35B-A3B-model2:
+    model: /mnt/model/ckpts/Qwen3.6-35B-A3B
+    engine: vllm
+    base_url: http://localhost:8001
+    api_key: <API_KEY>
+
+  # Qwen3.6-35B-A3B-model3:
+  #   model: /mnt/model/ckpts/Qwen3.6-35B-A3B
+  #   engine: vllm
+  #   base_url: http://localhost:8002
+  #   api_key: <API_KEY>
+
+  # Qwen3.6-35B-A3B-model4:
+  #   model: /mnt/model/ckpts/Qwen3.6-35B-A3B
+  #   engine: vllm
+  #   base_url: http://localhost:8003
+  #   api_key: <API_KEY>
+
+
+
+  

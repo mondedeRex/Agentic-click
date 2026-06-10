@@ -1,0 +1,118 @@
+# Python
+
+**pycache**/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+
+.venv/
+venv/
+env/
+ENV/
+
+# Build artifacts
+
+build/
+dist/
+*.egg-info/
+
+# Testing
+
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Type checkers / linters
+
+.mypy_cache/
+.ruff_cache/
+
+# Jupyter
+
+.ipynb_checkpoints/
+
+# Logs
+
+*.log
+logs/
+
+# IDE
+
+.vscode/
+.idea/
+
+# OS
+
+.DS_Store
+Thumbs.db
+
+# Environment variables / secrets
+
+.env
+.env.*
+*.pem
+*.key
+
+# Data
+
+cache/
+
+# Models
+
+models/
+checkpoints/
+ckpts/
+*.pt
+*.pth
+*.bin
+*.safetensors
+
+# Outputs
+
+outputs/
+results/
+artifacts/
+runs/
+
+# Temporary files
+
+tmp/
+.tmp/
+*.tmp
+*.bak
+
+
+# WandB
+
+wandb/
+
+# TensorBoard
+
+tb_logs/
+
+# HuggingFace cache
+
+.huggingface/
+
+
+# Local configs
+
+config.local.yaml
+config.local.yml
+
+# LLM / Agent / Codex
+.codex/
+codex/
+.codex-cache/
+codex-cache/
+codex_logs/
+codex_logs*/
+agent_logs/
+agent_runs/
+agent_outputs/
+trajectories/
+rollouts/
+conversations/
+responses/
+

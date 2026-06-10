@@ -1,0 +1,25 @@
+output_path: data/user_profiles.jsonl
+
+identities:
+  - college student
+  - new parent
+  - software engineer
+  - small business owner
+  - retired teacher
+  - fitness beginner
+  - frequent traveler
+  - budget-conscious shopper
+  - home cook
+  - city commuter
+
+interests:
+  - automotive
+  - consumer electronics
+  - home improvement
+  - personal finance
+  - outdoor recreation
+  - health and wellness
+  - online learning
+  - fashion and grooming
+  - food and cooking
+  - travel planning

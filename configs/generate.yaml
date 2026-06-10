@@ -1,0 +1,23 @@
+data_path: /mnt/model/liang.zeng/nips/datasets/NaiAD/NaiAD_main.jsonl
+user_profiles_path: data/user_profiles.jsonl
+supported_models_path: supported_models.yaml
+system_prompt_path: system_prompt.txt
+
+# Use "all", a comma-separated string, or a YAML list.
+models: all
+
+# split: evenly assigns rows across selected models.
+# broadcast: sends every row to every selected model.
+dispatch_mode: split
+
+start: 0
+limit:
+indices:
+
+concurrency: 8
+per_model_concurrency: 4
+timeout: 120.0
+max_retries: 2
+
+output:
+log_level: DEBUG
