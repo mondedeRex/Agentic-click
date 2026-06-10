@@ -305,6 +305,11 @@ class Generator:
                     messages=messages,
                     tools=TOOLS,
                     tool_choice="auto",
+                    extra_body={
+                        "chat_template_kwargs": {
+                            "enable_thinking": False,
+                        },
+                    },
                 )
                 result["ok"] = True
                 result["output"] = self.parse_message(response.choices[0].message)
