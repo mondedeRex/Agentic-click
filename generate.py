@@ -8,8 +8,10 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+import random
 import yaml
 from openai import AsyncOpenAI
+from tqdm import tqdm
 
 
 DATA_PATH = "/mnt/model/liang.zeng/nips/datasets/NaiAD/NaiAD_main.jsonl"
@@ -18,6 +20,8 @@ SYSTEM_PROMPT_PATH = "system_prompt.txt"
 SUPPORTED_MODELS_PATH = "supported_models.yaml"
 DEFAULT_CONFIG_PATH = "configs/generate.yaml"
 DEFAULT_OUTPUT_DIR = "results"
+
+
 
 TOOLS = [
     {
@@ -56,6 +60,7 @@ class GeneratorConfig:
     max_retries: int = 2
     output: str | None = None
     log_level: str = "INFO"
+    profile_limit: int | None = None
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "GeneratorConfig":
@@ -85,6 +90,14 @@ class Generator:
         profiles = self.load_jsonl(self.config.user_profiles_path)
         if not profiles:
             raise ValueError("User profile set is empty.")
+
+        if self.config.profile_limit is not None:
+            # randomly select a subset of profiles to reduce total number of requests if needed
+            random_indices = list(range(len(profiles)))
+            random.seed(42)
+            random.shuffle(random_indices)
+            selected_indices = set(random_indices[: self.config.profile_limit])
+            profiles = [profile for i, profile in enumerate(profiles) if i in selected_indices]
 
         self.supported_models = self.load_supported_models(
             self.config.supported_models_path
@@ -139,15 +152,17 @@ class Generator:
             for item_index, item, profile_index, profile, model_name in assignments
         ]
 
-        finished = 0
         with open(output_path, "w", encoding="utf-8") as f:
-            for task in asyncio.as_completed(tasks):
+            progress = tqdm(
+                asyncio.as_completed(tasks),
+                total=len(tasks),
+                desc="Generating All Assignments",
+                unit="req",
+            )
+            for task in progress:
                 result = await task
                 f.write(json.dumps(result, ensure_ascii=False) + "\n")
                 f.flush()
-                finished += 1
-                if finished % 10 == 0 or finished == len(tasks):
-                    logging.info("Finished %d/%d requests.", finished, len(tasks))
 
         await self.close()
         return output_path
@@ -384,7 +399,7 @@ class Generator:
     def build_profile(self, profile: dict[str, Any]) -> str:
         return "\n".join(
             [
-                f"- Youridentity: {profile['identity']}",
+                f"- Your identity: {profile['identity']}",
                 f"- Your interest: {profile['interest']}",
             ]
         )

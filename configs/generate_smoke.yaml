@@ -11,15 +11,15 @@ models: all
 dispatch_mode: split
 
 start: 0
-limit: 50
+limit: 1
 indices:
 
 concurrency: 8
-per_model_concurrency: 4
+per_model_concurrency: 8
 timeout: 120.0
-max_retries: 2
+max_retries: 3
 
 output:
 log_level: DEBUG
 
-profile_limit: 5
+profile_limit: 10
