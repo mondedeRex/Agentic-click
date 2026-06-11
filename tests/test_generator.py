@@ -194,18 +194,19 @@ class ItemToolCallSummaryTest(unittest.TestCase):
     def test_click_distribution_renders_histogram(self) -> None:
         text = ClickDistribution(
             [
-                {"tool_call_profiles": 0},
-                {"tool_call_profiles": 2},
-                {"tool_call_profiles": 2},
+                {"tool_call_profile_percent": 0.0},
+                {"tool_call_profile_percent": 0.25},
+                {"tool_call_profile_percent": 1.0},
             ]
         ).render()
 
         self.assertIn("Click distribution", text)
         self.assertIn("Total items: 3", text)
-        self.assertIn("Mean clicked profiles per item: 1.3333", text)
-        self.assertIn("Std clicked profiles per item: 0.9428", text)
-        self.assertIn("  0 clicks |     1 items | 33.33%", text)
-        self.assertIn("  2 clicks |     2 items | 66.67%", text)
+        self.assertIn("Mean click rate per item: 0.4167", text)
+        self.assertIn("Std click rate per item: 0.4249", text)
+        self.assertIn("0.0-0.1 |     1 items | 33.33%", text)
+        self.assertIn("0.2-0.3 |     1 items | 33.33%", text)
+        self.assertIn("0.9-1.0 |     1 items | 33.33%", text)
 
     def test_write_text_creates_missing_output_directory(self) -> None:
         generator = Generator(GeneratorConfig())

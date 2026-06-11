@@ -152,7 +152,7 @@ class ItemToolCallSummary:
 
 
 class ClickDistribution:
-    """Render item-level click counts as a terminal-friendly histogram."""
+    """Render item-level click rates as a terminal-friendly histogram."""
 
     def __init__(self, summary_rows: list[dict[str, Any]]) -> None:
         self.summary_rows = summary_rows
@@ -164,31 +164,35 @@ class ClickDistribution:
         if total_items == 0:
             return "Click distribution\nNo items were summarized."
 
-        distribution: dict[int, int] = {}
-        click_counts = []
-        max_clicks = 0
+        bucket_count = 10
+        distribution = [0 for _ in range(bucket_count)]
+        click_rates = []
         for row in self.summary_rows:
-            clicks = int(row["tool_call_profiles"])
-            click_counts.append(clicks)
-            distribution[clicks] = distribution.get(clicks, 0) + 1
-            max_clicks = max(max_clicks, clicks)
+            rate = float(row["tool_call_profile_percent"])
+            rate = min(1.0, max(0.0, rate))
+            click_rates.append(rate)
+            bucket_index = min(bucket_count - 1, int(rate * bucket_count))
+            distribution[bucket_index] += 1
 
-        max_items_in_bucket = max(distribution.values())
-        mean = sum(click_counts) / total_items
-        variance = sum((clicks - mean) ** 2 for clicks in click_counts) / total_items
+        max_items_in_bucket = max(distribution)
+        mean = sum(click_rates) / total_items
+        variance = sum((rate - mean) ** 2 for rate in click_rates) / total_items
         stddev = math.sqrt(variance)
         lines = [
             "Click distribution",
             f"Total items: {total_items}",
-            f"Mean clicked profiles per item: {mean:.4f}",
-            f"Std clicked profiles per item: {stddev:.4f}",
-            "Clicked profiles per item:",
+            f"Mean click rate per item: {mean:.4f}",
+            f"Std click rate per item: {stddev:.4f}",
+            "Click-rate buckets:",
         ]
-        for clicks in range(max_clicks + 1):
-            item_count = distribution.get(clicks, 0)
+        for bucket_index, item_count in enumerate(distribution):
+            lower = bucket_index / bucket_count
+            upper = (bucket_index + 1) / bucket_count
             percent = item_count / total_items
             bar = self.render_bar(item_count, max_items_in_bucket)
-            lines.append(f"{clicks:>3} clicks | {item_count:>5} items | {percent:6.2%} | {bar}")
+            lines.append(
+                f"{lower:.1f}-{upper:.1f} | {item_count:>5} items | {percent:6.2%} | {bar}"
+            )
         return "\n".join(lines)
 
     @staticmethod
