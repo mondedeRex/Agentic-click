@@ -101,6 +101,11 @@ def main() -> None:
             {"role": "system", "content": "You are a helpful assistant."},
             {"role": "user", "content": args.message},
         ],
+        extra_body={
+            "chat_template_kwargs": {
+                "enable_thinking": False,
+            },
+        },
     )
 
     print("\nResponse:")
