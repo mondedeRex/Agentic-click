@@ -2,6 +2,7 @@ import argparse
 import asyncio
 import json
 import logging
+import math
 import os
 import shutil
 from dataclasses import dataclass
@@ -164,16 +165,23 @@ class ClickDistribution:
             return "Click distribution\nNo items were summarized."
 
         distribution: dict[int, int] = {}
+        click_counts = []
         max_clicks = 0
         for row in self.summary_rows:
             clicks = int(row["tool_call_profiles"])
+            click_counts.append(clicks)
             distribution[clicks] = distribution.get(clicks, 0) + 1
             max_clicks = max(max_clicks, clicks)
 
         max_items_in_bucket = max(distribution.values())
+        mean = sum(click_counts) / total_items
+        variance = sum((clicks - mean) ** 2 for clicks in click_counts) / total_items
+        stddev = math.sqrt(variance)
         lines = [
             "Click distribution",
             f"Total items: {total_items}",
+            f"Mean clicked profiles per item: {mean:.4f}",
+            f"Std clicked profiles per item: {stddev:.4f}",
             "Clicked profiles per item:",
         ]
         for clicks in range(max_clicks + 1):

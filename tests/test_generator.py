@@ -202,6 +202,8 @@ class ItemToolCallSummaryTest(unittest.TestCase):
 
         self.assertIn("Click distribution", text)
         self.assertIn("Total items: 3", text)
+        self.assertIn("Mean clicked profiles per item: 1.3333", text)
+        self.assertIn("Std clicked profiles per item: 0.9428", text)
         self.assertIn("  0 clicks |     1 items | 33.33%", text)
         self.assertIn("  2 clicks |     2 items | 66.67%", text)
 
