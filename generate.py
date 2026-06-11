@@ -3,6 +3,7 @@ import asyncio
 import json
 import logging
 import os
+import shutil
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
@@ -22,6 +23,9 @@ DEFAULT_CONFIG_PATH = "configs/generate.yaml"
 DEFAULT_OUTPUT_DIR = "results"
 RESULTS_FILENAME = "generate.jsonl"
 TOOL_SUMMARY_FILENAME = "generate_tool_summary.jsonl"
+CONFIG_SNAPSHOT_FILENAME = "config.yaml"
+CLICK_DISTRIBUTION_FILENAME = "click_distribution.txt"
+NOISY_LOGGERS = ("httpx", "httpcore", "openai", "urllib3")
 
 
 
@@ -63,6 +67,7 @@ class GeneratorConfig:
     output: str | None = None
     log_level: str = "INFO"
     profile_limit: int | None = None
+    config_path: str | None = None
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "GeneratorConfig":
@@ -145,6 +150,48 @@ class ItemToolCallSummary:
         return rows
 
 
+class ClickDistribution:
+    """Render item-level click counts as a terminal-friendly histogram."""
+
+    def __init__(self, summary_rows: list[dict[str, Any]]) -> None:
+        self.summary_rows = summary_rows
+
+    def render(self) -> str:
+        """Return the click distribution as plain text."""
+
+        total_items = len(self.summary_rows)
+        if total_items == 0:
+            return "Click distribution\nNo items were summarized."
+
+        distribution: dict[int, int] = {}
+        max_clicks = 0
+        for row in self.summary_rows:
+            clicks = int(row["tool_call_profiles"])
+            distribution[clicks] = distribution.get(clicks, 0) + 1
+            max_clicks = max(max_clicks, clicks)
+
+        max_items_in_bucket = max(distribution.values())
+        lines = [
+            "Click distribution",
+            f"Total items: {total_items}",
+            "Clicked profiles per item:",
+        ]
+        for clicks in range(max_clicks + 1):
+            item_count = distribution.get(clicks, 0)
+            percent = item_count / total_items
+            bar = self.render_bar(item_count, max_items_in_bucket)
+            lines.append(f"{clicks:>3} clicks | {item_count:>5} items | {percent:6.2%} | {bar}")
+        return "\n".join(lines)
+
+    @staticmethod
+    def render_bar(value: int, maximum: int, width: int = 40) -> str:
+        """Return an ASCII bar scaled to the largest bucket."""
+
+        if value <= 0 or maximum <= 0:
+            return ""
+        return "#" * max(1, round(value / maximum * width))
+
+
 class Generator:
     def __init__(self, config: GeneratorConfig):
         self.config = config
@@ -182,6 +229,7 @@ class Generator:
         self.output_dir = self.get_output_dir()
         self.output_dir.mkdir(parents=True, exist_ok=True)
         output_path = self.get_output_path()
+        self.copy_config_snapshot()
 
         work_items = self.build_work_items(subset, profiles)
 
@@ -245,6 +293,12 @@ class Generator:
         tool_summary_path = self.get_tool_summary_output_path()
         self.write_tool_summary(tool_summary_path, tool_summary)
         logging.info("Wrote item tool-call summary to %s", tool_summary_path)
+
+        click_distribution_path = self.get_click_distribution_output_path()
+        click_distribution = ClickDistribution(tool_summary.rows()).render()
+        self.write_text(click_distribution_path, click_distribution)
+        print(click_distribution)
+        logging.info("Wrote click distribution to %s", click_distribution_path)
 
         await self.close()
         return output_path
@@ -542,6 +596,16 @@ class Generator:
 
         return self.require_output_dir() / TOOL_SUMMARY_FILENAME
 
+    def get_config_snapshot_output_path(self) -> Path:
+        """Return the copied run config path for this run."""
+
+        return self.require_output_dir() / CONFIG_SNAPSHOT_FILENAME
+
+    def get_click_distribution_output_path(self) -> Path:
+        """Return the click distribution report path for this run."""
+
+        return self.require_output_dir() / CLICK_DISTRIBUTION_FILENAME
+
     def write_tool_summary(
         self, output_path: Path, tool_summary: ItemToolCallSummary
     ) -> None:
@@ -551,6 +615,27 @@ class Generator:
         with open(output_path, "w", encoding="utf-8") as f:
             for row in tool_summary.rows():
                 f.write(json.dumps(row, ensure_ascii=False) + "\n")
+
+    def copy_config_snapshot(self) -> None:
+        """Copy the YAML config used for this run into the output directory."""
+
+        if not self.config.config_path:
+            return
+        source_path = Path(self.config.config_path)
+        if not source_path.exists():
+            logging.warning("Config snapshot source does not exist: %s", source_path)
+            return
+        output_path = self.get_config_snapshot_output_path()
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(source_path, output_path)
+
+    def write_text(self, output_path: Path, text: str) -> None:
+        """Write text output, creating the parent directory if needed."""
+
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(output_path, "w", encoding="utf-8") as f:
+            f.write(text)
+            f.write("\n")
 
     @staticmethod
     def normalize_indices(indices: str | list[int] | None) -> set[int] | None:
@@ -585,7 +670,16 @@ def load_yaml_config(path: str) -> dict[str, Any]:
 
 
 def build_config(cli_args: dict[str, Any]) -> GeneratorConfig:
-    return GeneratorConfig.from_dict(load_yaml_config(cli_args["config"]))
+    data = load_yaml_config(cli_args["config"])
+    data["config_path"] = cli_args["config"]
+    return GeneratorConfig.from_dict(data)
+
+
+def configure_noisy_loggers(level: int = logging.WARNING) -> None:
+    """Suppress chatty HTTP/client loggers below the given level."""
+
+    for logger_name in NOISY_LOGGERS:
+        logging.getLogger(logger_name).setLevel(level)
 
 
 def main() -> None:
@@ -594,6 +688,7 @@ def main() -> None:
         level=getattr(logging, config.log_level),
         format="%(asctime)s %(levelname)s %(message)s",
     )
+    configure_noisy_loggers()
     output_path = asyncio.run(Generator(config).run())
     logging.info("Done. Results saved to %s", output_path)
 

@@ -97,6 +97,12 @@ The raw assignment output is written inside that directory:
 results/generate_<timestamp>/generate.jsonl
 ```
 
+The YAML config used for the run is copied into the same directory:
+
+```bash
+results/generate_<timestamp>/config.yaml
+```
+
 Each raw output row should record input fields, profile metadata, selected
 model, success/failure status, model output, and usage when available.
 
@@ -111,11 +117,20 @@ Each summary row records one input item (`query`/`response`), the number of
 profiles evaluated for that item, how many profiles called tools, and the
 corresponding percentage.
 
+At the end of each run, `generate.py` prints a terminal-friendly click
+distribution and saves it to:
+
+```bash
+results/generate_<timestamp>/click_distribution.txt
+```
+
 ## Logging
 
 When `log_level: DEBUG`, log exactly one complete message example. Do not log
 every request's full message because data/profile crossover can create many
 work items.
+
+Keep noisy HTTP/client logs suppressed unless they are warnings or errors.
 
 ## Testing
 

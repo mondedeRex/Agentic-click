@@ -1,3 +1,4 @@
+import logging
 import sys
 import tempfile
 import unittest
@@ -5,7 +6,13 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from generate import Generator, GeneratorConfig, ItemToolCallSummary
+from generate import (
+    ClickDistribution,
+    Generator,
+    GeneratorConfig,
+    ItemToolCallSummary,
+    configure_noisy_loggers,
+)
 
 
 class GeneratorMessageTest(unittest.TestCase):
@@ -162,6 +169,61 @@ class ItemToolCallSummaryTest(unittest.TestCase):
 
             self.assertTrue(output_path.exists())
             self.assertTrue(output_path.parent.is_dir())
+
+    def test_copy_config_snapshot_writes_config_yaml(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            source_path = temp_path / "source.yaml"
+            output_dir = temp_path / "out"
+            source_path.write_text("limit: 1\n", encoding="utf-8")
+            generator = Generator(
+                GeneratorConfig(
+                    output=str(output_dir),
+                    config_path=str(source_path),
+                )
+            )
+
+            generator.copy_config_snapshot()
+
+            snapshot_path = output_dir / "config.yaml"
+            self.assertEqual(
+                snapshot_path.read_text(encoding="utf-8"),
+                "limit: 1\n",
+            )
+
+    def test_click_distribution_renders_histogram(self) -> None:
+        text = ClickDistribution(
+            [
+                {"tool_call_profiles": 0},
+                {"tool_call_profiles": 2},
+                {"tool_call_profiles": 2},
+            ]
+        ).render()
+
+        self.assertIn("Click distribution", text)
+        self.assertIn("Total items: 3", text)
+        self.assertIn("  0 clicks |     1 items | 33.33%", text)
+        self.assertIn("  2 clicks |     2 items | 66.67%", text)
+
+    def test_write_text_creates_missing_output_directory(self) -> None:
+        generator = Generator(GeneratorConfig())
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            output_path = Path(temp_dir) / "missing" / "click_distribution.txt"
+
+            generator.write_text(output_path, "Click distribution")
+
+            self.assertEqual(
+                output_path.read_text(encoding="utf-8"),
+                "Click distribution\n",
+            )
+
+    def test_configure_noisy_loggers_sets_warning_level(self) -> None:
+        logging.getLogger("httpx").setLevel(logging.DEBUG)
+
+        configure_noisy_loggers()
+
+        self.assertEqual(logging.getLogger("httpx").level, logging.WARNING)
 
 if __name__ == "__main__":
     unittest.main()
