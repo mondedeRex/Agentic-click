@@ -85,14 +85,31 @@ Keep `broadcast` available only as an explicit config option.
 
 ## Results
 
-Default result files are written to:
+Each run writes results to a timestamped directory:
 
 ```bash
-results/generate_<timestamp>.jsonl
+results/generate_<timestamp>/
 ```
 
-Each output row should record input fields, profile metadata, selected model,
-success/failure status, model output, and usage when available.
+The raw assignment output is written inside that directory:
+
+```bash
+results/generate_<timestamp>/generate.jsonl
+```
+
+Each raw output row should record input fields, profile metadata, selected
+model, success/failure status, model output, and usage when available.
+
+For each generated result file, `generate.py` also writes an item-level tool
+summary JSONL inside the same run directory:
+
+```bash
+results/generate_<timestamp>/generate_tool_summary.jsonl
+```
+
+Each summary row records one input item (`query`/`response`), the number of
+profiles evaluated for that item, how many profiles called tools, and the
+corresponding percentage.
 
 ## Logging
 
@@ -130,3 +147,6 @@ python -m unittest discover
 - 完成之后，及时修改AGENT.md对应的内容
 - 在重要功能实现后，修改单元测试
 - 不需要关注本地的包是否安装了
+- 实现简洁清晰
+- 重要的函数至少要简洁的给出 doc string
+- 简单的设计不需要做plan，单元测试。

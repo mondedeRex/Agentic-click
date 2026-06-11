@@ -1,10 +1,11 @@
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from generate import Generator, GeneratorConfig
+from generate import Generator, GeneratorConfig, ItemToolCallSummary
 
 
 class GeneratorMessageTest(unittest.TestCase):
@@ -24,6 +25,143 @@ class GeneratorMessageTest(unittest.TestCase):
         )
         
         print(f"Generated messages: {messages}")
+
+
+class ItemToolCallSummaryTest(unittest.TestCase):
+    def test_rows_count_tool_call_profiles_per_item(self) -> None:
+        summary = ItemToolCallSummary()
+
+        for profile_index in range(10):
+            summary.add_result(
+                {
+                    "item_index": 3,
+                    "profile_index": profile_index,
+                    "ok": True,
+                    "input": {
+                        "query": "query",
+                        "response": "response",
+                    },
+                    "output": {
+                        "tool_calls": [
+                            {
+                                "id": f"call_{profile_index}",
+                                "type": "function",
+                                "function": {
+                                    "name": "click",
+                                    "arguments": {"reason": "interested"},
+                                },
+                            }
+                        ]
+                        if profile_index in {1, 4, 7}
+                        else []
+                    },
+                }
+            )
+
+        rows = summary.rows()
+
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]["item_index"], 3)
+        self.assertEqual(rows[0]["query"], "query")
+        self.assertEqual(rows[0]["response"], "response")
+        self.assertEqual(rows[0]["total_profiles"], 10)
+        self.assertEqual(rows[0]["tool_call_profiles"], 3)
+        self.assertEqual(rows[0]["total_assignments"], 10)
+        self.assertEqual(rows[0]["tool_call_assignments"], 3)
+        self.assertAlmostEqual(rows[0]["tool_call_profile_percent"], 0.3)
+
+    def test_rows_count_broadcast_profiles_once(self) -> None:
+        summary = ItemToolCallSummary()
+
+        for model_index in range(2):
+            summary.add_result(
+                {
+                    "item_index": 1,
+                    "profile_index": 5,
+                    "ok": True,
+                    "input": {
+                        "query": "query",
+                        "response": "response",
+                    },
+                    "output": {
+                        "tool_calls": [
+                            {
+                                "id": f"call_{model_index}",
+                                "type": "function",
+                                "function": {
+                                    "name": "click",
+                                    "arguments": {"reason": "interested"},
+                                },
+                            }
+                        ]
+                    },
+                }
+            )
+
+        row = summary.rows()[0]
+
+        self.assertEqual(row["total_profiles"], 1)
+        self.assertEqual(row["tool_call_profiles"], 1)
+        self.assertEqual(row["total_assignments"], 2)
+        self.assertEqual(row["tool_call_assignments"], 2)
+
+    def test_get_output_path_uses_run_directory(self) -> None:
+        generator = Generator(GeneratorConfig(output="results/generate_20260611_120000"))
+
+        path = generator.get_output_path()
+
+        self.assertEqual(
+            path,
+            Path("results/generate_20260611_120000/generate.jsonl"),
+        )
+
+    def test_get_tool_summary_output_path_uses_fixed_filename(self) -> None:
+        generator = Generator(GeneratorConfig(output="results/generate_20260611_120000"))
+
+        path = generator.get_tool_summary_output_path()
+
+        self.assertEqual(
+            path,
+            Path("results/generate_20260611_120000/generate_tool_summary.jsonl"),
+        )
+
+    def test_output_paths_share_cached_output_dir(self) -> None:
+        generator = Generator(GeneratorConfig(output="results/first"))
+        generator.output_dir = Path("results/cached")
+        generator.config.output = "results/second"
+
+        self.assertEqual(
+            generator.get_output_path(),
+            Path("results/cached/generate.jsonl"),
+        )
+        self.assertEqual(
+            generator.get_tool_summary_output_path(),
+            Path("results/cached/generate_tool_summary.jsonl"),
+        )
+
+    def test_write_tool_summary_creates_missing_output_directory(self) -> None:
+        generator = Generator(GeneratorConfig())
+        summary = ItemToolCallSummary()
+        summary.add_result(
+            {
+                "item_index": 0,
+                "profile_index": 0,
+                "ok": True,
+                "input": {
+                    "query": "query",
+                    "response": "response",
+                },
+                "output": {"tool_calls": []},
+            }
+        )
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            output_path = Path(temp_dir) / "missing" / "generate_tool_summary.jsonl"
+
+            generator.write_tool_summary(output_path, summary)
+
+            self.assertTrue(output_path.exists())
+            self.assertTrue(output_path.parent.is_dir())
 
 if __name__ == "__main__":
     unittest.main()

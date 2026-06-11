@@ -20,6 +20,8 @@ SYSTEM_PROMPT_PATH = "system_prompt.txt"
 SUPPORTED_MODELS_PATH = "supported_models.yaml"
 DEFAULT_CONFIG_PATH = "configs/generate.yaml"
 DEFAULT_OUTPUT_DIR = "results"
+RESULTS_FILENAME = "generate.jsonl"
+TOOL_SUMMARY_FILENAME = "generate_tool_summary.jsonl"
 
 
 
@@ -71,6 +73,78 @@ class GeneratorConfig:
         return cls(**data)
 
 
+class ItemToolCallSummary:
+    """Aggregate tool-call counts for every source item across profiles."""
+
+    def __init__(self) -> None:
+        self.items: dict[int, dict[str, Any]] = {}
+
+    def add_result(self, result: dict[str, Any]) -> None:
+        """Add one assignment result to the item-level summary."""
+
+        item_index = int(result["item_index"])
+        item = self.items.setdefault(
+            item_index,
+            {
+                "item_index": item_index,
+                "query": None,
+                "response": None,
+                "_profile_indexes": set(),
+                "_tool_call_profile_indexes": set(),
+                "total_assignments": 0,
+                "ok_assignments": 0,
+                "failed_assignments": 0,
+                "tool_call_assignments": 0,
+                "tool_call_count": 0,
+            },
+        )
+
+        input_data = result.get("input") or {}
+        if item["query"] is None and "query" in input_data:
+            item["query"] = input_data["query"]
+        if item["response"] is None and "response" in input_data:
+            item["response"] = input_data["response"]
+
+        profile_index = int(result["profile_index"])
+        item["_profile_indexes"].add(profile_index)
+        item["total_assignments"] += 1
+        if result.get("ok"):
+            item["ok_assignments"] += 1
+        else:
+            item["failed_assignments"] += 1
+
+        tool_calls = ((result.get("output") or {}).get("tool_calls")) or []
+        if tool_calls:
+            item["_tool_call_profile_indexes"].add(profile_index)
+            item["tool_call_assignments"] += 1
+            item["tool_call_count"] += len(tool_calls)
+
+    def rows(self) -> list[dict[str, Any]]:
+        """Return stable JSONL-ready rows sorted by item index."""
+
+        rows = []
+        for item in sorted(self.items.values(), key=lambda row: row["item_index"]):
+            total = item["total_assignments"]
+            total_profiles = len(item["_profile_indexes"])
+            tool_call_profiles = len(item["_tool_call_profile_indexes"])
+            tool_call_assignments = item["tool_call_assignments"]
+            row = {
+                key: value
+                for key, value in item.items()
+                if not key.startswith("_")
+            }
+            row["total_profiles"] = total_profiles
+            row["tool_call_profiles"] = tool_call_profiles
+            row["tool_call_profile_percent"] = (
+                tool_call_profiles / total_profiles if total_profiles else 0.0
+            )
+            row["tool_call_assignment_percent"] = (
+                tool_call_assignments / total if total else 0.0
+            )
+            rows.append(row)
+        return rows
+
+
 class Generator:
     def __init__(self, config: GeneratorConfig):
         self.config = config
@@ -80,6 +154,7 @@ class Generator:
         self.clients: dict[str, AsyncOpenAI] = {}
         self.logged_message_example = False
         self.message_log_lock = asyncio.Lock()
+        self.output_dir: Path | None = None
 
     async def run(self) -> Path:
         self.load_system_prompt()
@@ -104,8 +179,9 @@ class Generator:
         )
         self.selected_models = self.select_models(self.supported_models)
 
+        self.output_dir = self.get_output_dir()
+        self.output_dir.mkdir(parents=True, exist_ok=True)
         output_path = self.get_output_path()
-        output_path.parent.mkdir(parents=True, exist_ok=True)
 
         work_items = self.build_work_items(subset, profiles)
 
@@ -152,6 +228,7 @@ class Generator:
             for item_index, item, profile_index, profile, model_name in assignments
         ]
 
+        tool_summary = ItemToolCallSummary()
         with open(output_path, "w", encoding="utf-8") as f:
             progress = tqdm(
                 asyncio.as_completed(tasks),
@@ -163,6 +240,11 @@ class Generator:
                 result = await task
                 f.write(json.dumps(result, ensure_ascii=False) + "\n")
                 f.flush()
+                tool_summary.add_result(result)
+
+        tool_summary_path = self.get_tool_summary_output_path()
+        self.write_tool_summary(tool_summary_path, tool_summary)
+        logging.info("Wrote item tool-call summary to %s", tool_summary_path)
 
         await self.close()
         return output_path
@@ -433,11 +515,42 @@ class Generator:
             "tool_calls": tool_calls,
         }
 
-    def get_output_path(self) -> Path:
+    
+
+    def get_output_dir(self) -> Path:
+        """Return the output directory for this run."""
+
         if self.config.output:
             return Path(self.config.output)
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        return Path(DEFAULT_OUTPUT_DIR) / f"generate_{timestamp}.jsonl"
+        return Path(DEFAULT_OUTPUT_DIR) / f"generate_{timestamp}"
+
+    def require_output_dir(self) -> Path:
+        """Return the cached output directory after it has been initialized."""
+
+        if self.output_dir is None:
+            self.output_dir = self.get_output_dir()
+        return self.output_dir
+    
+    def get_output_path(self) -> Path:
+        """Return the raw assignment JSONL path for this run."""
+
+        return self.require_output_dir() / RESULTS_FILENAME
+    
+    def get_tool_summary_output_path(self) -> Path:
+        """Return the item-level tool summary JSONL path for this run."""
+
+        return self.require_output_dir() / TOOL_SUMMARY_FILENAME
+
+    def write_tool_summary(
+        self, output_path: Path, tool_summary: ItemToolCallSummary
+    ) -> None:
+        """Write the item-level tool summary as JSONL."""
+
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(output_path, "w", encoding="utf-8") as f:
+            for row in tool_summary.rows():
+                f.write(json.dumps(row, ensure_ascii=False) + "\n")
 
     @staticmethod
     def normalize_indices(indices: str | list[int] | None) -> set[int] | None:
