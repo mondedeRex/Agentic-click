@@ -34,15 +34,15 @@ class ClickSummaryPpiedScoreUpdaterTest(unittest.TestCase):
             },
         ]
         summary_rows = [
-            {"item_index": 1, "tool_call_profile_percent": 0.75},
-            {"item_index": 0, "tool_call_profile_percent": 0.25},
+            {"item_index": 1, "tool_call_profile_percent": 0.75555},
+            {"item_index": 0, "tool_call_profile_percent": "0.24444"},
         ]
 
         rows = updater.transform(source_rows, summary_rows)
 
         self.assertEqual([row["query"] for row in rows], ["q1", "q0"])
-        self.assertEqual(rows[0]["ppied_scores"], {"q4": 0.75})
-        self.assertEqual(rows[1]["ppied_scores"], {"q4": 0.25})
+        self.assertEqual(rows[0]["ppied_scores"], {"q4": 0.7556})
+        self.assertEqual(rows[1]["ppied_scores"], {"q4": 0.2444})
         self.assertEqual(source_rows[0]["ppied_scores"]["q1"], 1)
 
     def test_run_writes_updated_jsonl(self) -> None:

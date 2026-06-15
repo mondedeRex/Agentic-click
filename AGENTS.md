@@ -139,7 +139,7 @@ python scripts/apply_click_summary.py --config configs/apply_click_summary.yaml
 The script reads the generate-time `data_path` source JSONL and a
 `generate_tool_summary.jsonl`, writes one output row per summary item, removes
 `ppied_scores.q1` through `ppied_scores.q3`, and replaces `ppied_scores.q4`
-with the click rate from the summary row.
+with the click rate from the summary row rounded to four decimal places.
 
 ## Logging
 

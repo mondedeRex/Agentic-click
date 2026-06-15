@@ -128,7 +128,13 @@ class ClickSummaryPpiedScoreUpdater(JsonlProcessor):
         )
 
     @staticmethod
-    def replace_ppied_q4(source_row: dict[str, Any], click_rate: Any) -> dict[str, Any]:
+    def normalize_click_rate(click_rate: Any) -> float:
+        """Return the click rate rounded to four decimal places."""
+
+        return round(float(click_rate), 4)
+
+    @classmethod
+    def replace_ppied_q4(cls, source_row: dict[str, Any], click_rate: Any) -> dict[str, Any]:
         """Copy one row, remove ppied q1-q3, and set ppied q4."""
 
         row = copy.deepcopy(source_row)
@@ -138,7 +144,7 @@ class ClickSummaryPpiedScoreUpdater(JsonlProcessor):
 
         for key in ("q1", "q2", "q3"):
             ppied_scores.pop(key, None)
-        ppied_scores["q4"] = click_rate
+        ppied_scores["q4"] = cls.normalize_click_rate(click_rate)
         return row
 
 
