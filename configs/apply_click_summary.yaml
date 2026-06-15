@@ -1,0 +1,7 @@
+source_data_path: /mnt/model/liang.zeng/nips/datasets/NaiAD/NaiAD_main.jsonl
+click_summary_path: results/generate_YYYYMMDD_HHMMSS/generate_tool_summary.jsonl
+output_path: data/click_summary_ppied_scores.jsonl
+
+# Optional. If omitted, the script accepts clickrate, click_rate, or
+# tool_call_profile_percent.
+click_rate_field:
