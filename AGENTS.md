@@ -39,6 +39,33 @@ python generate.py --config configs/generate.yaml
 
 If `--config` is omitted, `generate.py` uses `configs/generate.yaml`.
 
+To run multiple generate configs sequentially, place YAML files in:
+
+```bash
+configs/generate_batch/
+```
+
+Then run:
+
+```bash
+python run_generate_batch.py
+```
+
+To use a different batch config directory, pass `--config_dir`:
+
+```bash
+python run_generate_batch.py --config_dir configs/my_batch
+```
+
+The batch runner runs each task as:
+
+```bash
+python generate.py --config <config.yaml>
+```
+
+If one config fails, the runner continues with the next config and reports all
+failed configs at the end.
+
 Supported models are configured in:
 
 ```bash
