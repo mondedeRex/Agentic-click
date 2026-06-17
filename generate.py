@@ -68,6 +68,7 @@ class GeneratorConfig:
     output: str | None = None
     log_level: str = "INFO"
     profile_limit: int | None = None
+    randomize_user_profiles: bool = False
     config_path: str | None = None
 
     @classmethod
@@ -225,13 +226,11 @@ class Generator:
         if not profiles:
             raise ValueError("User profile set is empty.")
 
-        if self.config.profile_limit is not None:
-            # randomly select a subset of profiles to reduce total number of requests if needed
-            random_indices = list(range(len(profiles)))
-            random.seed(42)
-            random.shuffle(random_indices)
-            selected_indices = set(random_indices[: self.config.profile_limit])
-            profiles = [profile for i, profile in enumerate(profiles) if i in selected_indices]
+        if (
+            self.config.profile_limit is not None
+            and not self.config.randomize_user_profiles
+        ):
+            profiles = self.select_global_profiles(profiles)
 
         self.supported_models = self.load_supported_models(
             self.config.supported_models_path
@@ -479,8 +478,52 @@ class Generator:
         return [
             (item_index, item, profile_index, profile)
             for item_index, item in subset
-            for profile_index, profile in profiles
+            for profile_index, profile in self.select_profiles_for_item(
+                profiles, item_index
+            )
         ]
+
+    def select_global_profiles(
+        self, profiles: list[tuple[int, dict[str, Any]]]
+    ) -> list[tuple[int, dict[str, Any]]]:
+        """Return one deterministic random profile subset for the whole run."""
+
+        sample_size = self.get_profile_sample_size(profiles)
+        if sample_size is None:
+            return profiles
+
+        random_indices = list(range(len(profiles)))
+        random.Random(42).shuffle(random_indices)
+        selected_indices = set(random_indices[:sample_size])
+        return [
+            profile
+            for profile_offset, profile in enumerate(profiles)
+            if profile_offset in selected_indices
+        ]
+
+    def select_profiles_for_item(
+        self, profiles: list[tuple[int, dict[str, Any]]], item_index: int
+    ) -> list[tuple[int, dict[str, Any]]]:
+        """Return the profile set assigned to one source item."""
+
+        sample_size = self.get_profile_sample_size(profiles)
+        if sample_size is None or not self.config.randomize_user_profiles:
+            return profiles
+
+        rng = random.Random(42 + item_index)
+        profile_offsets = rng.sample(range(len(profiles)), sample_size)
+        return [profiles[offset] for offset in profile_offsets]
+
+    def get_profile_sample_size(
+        self, profiles: list[tuple[int, dict[str, Any]]]
+    ) -> int | None:
+        """Return the bounded profile sample size for configured profile_limit."""
+
+        if self.config.profile_limit is None:
+            return None
+        if self.config.profile_limit < 0:
+            raise ValueError("profile_limit must be >= 0.")
+        return min(self.config.profile_limit, len(profiles))
 
     def build_assignments(
         self, work_items: list[tuple[int, dict[str, Any], int, dict[str, Any]]]
@@ -667,6 +710,11 @@ def parse_cli_args() -> dict[str, Any]:
         default=DEFAULT_CONFIG_PATH,
         help="YAML config path.",
     )
+    parser.add_argument(
+        "--randomize-user-profiles",
+        action="store_true",
+        help="Randomly sample profiles independently for each item.",
+    )
     return vars(parser.parse_args())
 
 
@@ -683,6 +731,8 @@ def load_yaml_config(path: str) -> dict[str, Any]:
 
 def build_config(cli_args: dict[str, Any]) -> GeneratorConfig:
     data = load_yaml_config(cli_args["config"])
+    if cli_args.get("randomize_user_profiles"):
+        data["randomize_user_profiles"] = True
     data["config_path"] = cli_args["config"]
     return GeneratorConfig.from_dict(data)
 

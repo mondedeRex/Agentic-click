@@ -53,6 +53,20 @@ generate_user_profiles.py
 data/user_profiles.jsonl
 ```
 
+When `profile_limit` is set, `generate.py` normally samples one deterministic
+profile subset for the whole run and applies it to every selected item. To
+sample profiles independently for each item, set:
+
+```yaml
+randomize_user_profiles: true
+```
+
+or run with:
+
+```bash
+python generate.py --config configs/generate.yaml --randomize-user-profiles
+```
+
 ## Message Construction
 
 Keep message construction simple and explicit:

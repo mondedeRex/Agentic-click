@@ -11,6 +11,7 @@ from generate import (
     Generator,
     GeneratorConfig,
     ItemToolCallSummary,
+    build_config,
     configure_noisy_loggers,
 )
 
@@ -111,6 +112,72 @@ class ItemToolCallSummaryTest(unittest.TestCase):
         self.assertEqual(row["tool_call_profiles"], 1)
         self.assertEqual(row["total_assignments"], 2)
         self.assertEqual(row["tool_call_assignments"], 2)
+
+    def test_build_work_items_uses_global_profile_sample_by_default(self) -> None:
+        generator = Generator(GeneratorConfig(profile_limit=2))
+        subset = [
+            (10, {"query": "q0", "response": "r0"}),
+            (11, {"query": "q1", "response": "r1"}),
+        ]
+        profiles = [
+            (0, {"profile_id": "p0"}),
+            (1, {"profile_id": "p1"}),
+            (2, {"profile_id": "p2"}),
+            (3, {"profile_id": "p3"}),
+        ]
+        selected_profiles = generator.select_global_profiles(profiles)
+
+        work_items = generator.build_work_items(subset, selected_profiles)
+
+        by_item = {
+            item_index: [
+                profile_index
+                for current_item_index, _, profile_index, _ in work_items
+                if current_item_index == item_index
+            ]
+            for item_index, _ in subset
+        }
+        self.assertEqual(by_item[10], by_item[11])
+        self.assertEqual(len(by_item[10]), 2)
+
+    def test_build_work_items_randomizes_profile_sample_per_item(self) -> None:
+        generator = Generator(
+            GeneratorConfig(profile_limit=2, randomize_user_profiles=True)
+        )
+        subset = [
+            (10, {"query": "q0", "response": "r0"}),
+            (11, {"query": "q1", "response": "r1"}),
+        ]
+        profiles = [
+            (0, {"profile_id": "p0"}),
+            (1, {"profile_id": "p1"}),
+            (2, {"profile_id": "p2"}),
+            (3, {"profile_id": "p3"}),
+        ]
+
+        work_items = generator.build_work_items(subset, profiles)
+
+        by_item = {
+            item_index: [
+                profile_index
+                for current_item_index, _, profile_index, _ in work_items
+                if current_item_index == item_index
+            ]
+            for item_index, _ in subset
+        }
+        self.assertEqual(len(by_item[10]), 2)
+        self.assertEqual(len(by_item[11]), 2)
+        self.assertNotEqual(by_item[10], by_item[11])
+
+    def test_build_config_store_true_enables_profile_randomization(self) -> None:
+        config = build_config(
+            {
+                "config": "configs/does_not_exist_for_test.yaml",
+                "randomize_user_profiles": True,
+            }
+        )
+
+        self.assertTrue(config.randomize_user_profiles)
 
     def test_get_output_path_uses_run_directory(self) -> None:
         generator = Generator(GeneratorConfig(output="results/generate_20260611_120000"))
