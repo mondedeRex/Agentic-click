@@ -158,6 +158,17 @@ Each summary row records one input item (`query`/`response`), the number of
 profiles evaluated for that item, how many profiles called tools, and the
 corresponding percentage.
 
+For each generated result file, `generate.py` also writes a selected-source-data
+JSONL with item click rates copied into `ppied_scores.q4`:
+
+```bash
+results/generate_<timestamp>/generate_data_with_click_q4.jsonl
+```
+
+This file contains only the source items selected for the current run, such as
+the rows selected by `start`/`limit`/`indices`. Other source fields are
+preserved.
+
 At the end of each run, `generate.py` prints a terminal-friendly click
 distribution and saves it to:
 
@@ -168,13 +179,13 @@ results/generate_<timestamp>/click_distribution.txt
 To apply item-level click rates back to the original source data, configure:
 
 ```bash
-configs/apply_click_summary.yaml
+configs/substitute_ppied_q4_from_click_summary.yaml
 ```
 
 Run with:
 
 ```bash
-python scripts/apply_click_summary.py --config configs/apply_click_summary.yaml
+python scripts/substitute_ppied_q4_from_click_summary.py --config configs/substitute_ppied_q4_from_click_summary.yaml
 ```
 
 The script reads the generate-time `data_path` source JSONL and a

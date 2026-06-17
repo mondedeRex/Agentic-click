@@ -8,19 +8,19 @@ from typing import Any
 import yaml
 
 
-DEFAULT_CONFIG_PATH = "configs/apply_click_summary.yaml"
+DEFAULT_CONFIG_PATH = "configs/substitute_ppied_q4_from_click_summary.yaml"
 DEFAULT_CLICK_RATE_FIELDS = ("clickrate", "click_rate", "tool_call_profile_percent")
 
 
 @dataclass
-class ClickSummaryConfig:
+class PpiedQ4SubstitutionConfig:
     source_data_path: str
     click_summary_path: str
     output_path: str
     click_rate_field: str | None = None
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "ClickSummaryConfig":
+    def from_dict(cls, data: dict[str, Any]) -> "PpiedQ4SubstitutionConfig":
         valid_keys = set(cls.__dataclass_fields__)
         unknown = sorted(set(data) - valid_keys)
         if unknown:
@@ -63,10 +63,10 @@ class JsonlProcessor:
                 f.write(json.dumps(row, ensure_ascii=False) + "\n")
 
 
-class ClickSummaryPpiedScoreUpdater(JsonlProcessor):
-    """Build source-data rows whose ppied_scores.q4 is a click summary rate."""
+class PpiedQ4Substituter(JsonlProcessor):
+    """Substitute ppied_scores.q4 with click rates from a summary file."""
 
-    def __init__(self, config: ClickSummaryConfig) -> None:
+    def __init__(self, config: PpiedQ4SubstitutionConfig) -> None:
         self.config = config
 
     def run(self) -> Path:
@@ -171,12 +171,12 @@ def load_yaml_config(path: str) -> dict[str, Any]:
     return data
 
 
-def build_config(cli_args: dict[str, Any]) -> ClickSummaryConfig:
-    return ClickSummaryConfig.from_dict(load_yaml_config(cli_args["config"]))
+def build_config(cli_args: dict[str, Any]) -> PpiedQ4SubstitutionConfig:
+    return PpiedQ4SubstitutionConfig.from_dict(load_yaml_config(cli_args["config"]))
 
 
 def main() -> None:
-    output_path = ClickSummaryPpiedScoreUpdater(build_config(parse_cli_args())).run()
+    output_path = PpiedQ4Substituter(build_config(parse_cli_args())).run()
     print(f"Wrote updated data to {output_path}")
 
 

@@ -6,16 +6,16 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from scripts.apply_click_summary import (  # noqa: E402
-    ClickSummaryConfig,
-    ClickSummaryPpiedScoreUpdater,
+from scripts.substitute_ppied_q4_from_click_summary import (  # noqa: E402
+    PpiedQ4SubstitutionConfig,
+    PpiedQ4Substituter,
 )
 
 
-class ClickSummaryPpiedScoreUpdaterTest(unittest.TestCase):
+class PpiedQ4SubstituterTest(unittest.TestCase):
     def test_transform_replaces_ppied_q4_from_summary_click_rate(self) -> None:
-        updater = ClickSummaryPpiedScoreUpdater(
-            ClickSummaryConfig(
+        updater = PpiedQ4Substituter(
+            PpiedQ4SubstitutionConfig(
                 source_data_path="source.jsonl",
                 click_summary_path="summary.jsonl",
                 output_path="output.jsonl",
@@ -46,7 +46,7 @@ class ClickSummaryPpiedScoreUpdaterTest(unittest.TestCase):
         self.assertEqual(source_rows[0]["ppied_scores"]["q1"], 1)
 
     def test_run_writes_updated_jsonl(self) -> None:
-        temp_path = Path(".tmp") / "test_apply_click_summary"
+        temp_path = Path(".tmp") / "test_substitute_ppied_q4"
         if temp_path.exists():
             shutil.rmtree(temp_path)
         temp_path.mkdir(parents=True)
@@ -70,8 +70,8 @@ class ClickSummaryPpiedScoreUpdaterTest(unittest.TestCase):
             json.dumps({"item_index": 0, "clickrate": 0.6}) + "\n",
             encoding="utf-8",
         )
-        updater = ClickSummaryPpiedScoreUpdater(
-            ClickSummaryConfig(
+        updater = PpiedQ4Substituter(
+            PpiedQ4SubstitutionConfig(
                 source_data_path=str(source_path),
                 click_summary_path=str(summary_path),
                 output_path=str(output_path),
@@ -84,8 +84,8 @@ class ClickSummaryPpiedScoreUpdaterTest(unittest.TestCase):
         self.assertEqual(row["ppied_scores"], {"q4": 0.6})
 
     def test_transform_rejects_missing_ppied_scores(self) -> None:
-        updater = ClickSummaryPpiedScoreUpdater(
-            ClickSummaryConfig(
+        updater = PpiedQ4Substituter(
+            PpiedQ4SubstitutionConfig(
                 source_data_path="source.jsonl",
                 click_summary_path="summary.jsonl",
                 output_path="output.jsonl",

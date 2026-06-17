@@ -1,5 +1,6 @@
 import argparse
 import asyncio
+import copy
 import json
 import logging
 import math
@@ -26,6 +27,7 @@ RESULTS_FILENAME = "generate.jsonl"
 TOOL_SUMMARY_FILENAME = "generate_tool_summary.jsonl"
 CONFIG_SNAPSHOT_FILENAME = "config.yaml"
 CLICK_DISTRIBUTION_FILENAME = "click_distribution.txt"
+CLICK_Q4_DATA_FILENAME = "generate_data_with_click_q4.jsonl"
 NOISY_LOGGERS = ("httpx", "httpcore", "openai", "urllib3")
 
 
@@ -304,6 +306,14 @@ class Generator:
         tool_summary_path = self.get_tool_summary_output_path()
         self.write_tool_summary(tool_summary_path, tool_summary)
         logging.info("Wrote item tool-call summary to %s", tool_summary_path)
+
+        click_q4_data_path = self.get_click_q4_data_output_path()
+        self.write_click_q4_data(
+            click_q4_data_path,
+            subset,
+            tool_summary.rows(),
+        )
+        logging.info("Wrote click q4 data to %s", click_q4_data_path)
 
         click_distribution_path = self.get_click_distribution_output_path()
         click_distribution = ClickDistribution(tool_summary.rows()).render()
@@ -661,6 +671,11 @@ class Generator:
 
         return self.require_output_dir() / CLICK_DISTRIBUTION_FILENAME
 
+    def get_click_q4_data_output_path(self) -> Path:
+        """Return the selected source-data JSONL path with click q4 values."""
+
+        return self.require_output_dir() / CLICK_Q4_DATA_FILENAME
+
     def write_tool_summary(
         self, output_path: Path, tool_summary: ItemToolCallSummary
     ) -> None:
@@ -669,6 +684,32 @@ class Generator:
         output_path.parent.mkdir(parents=True, exist_ok=True)
         with open(output_path, "w", encoding="utf-8") as f:
             for row in tool_summary.rows():
+                f.write(json.dumps(row, ensure_ascii=False) + "\n")
+
+    def write_click_q4_data(
+        self,
+        output_path: Path,
+        subset: list[tuple[int, dict[str, Any]]],
+        summary_rows: list[dict[str, Any]],
+    ) -> None:
+        """Write selected source rows with ppied_scores.q4 set to click rate."""
+
+        click_rates_by_item = {
+            int(row["item_index"]): round(float(row["tool_call_profile_percent"]), 4)
+            for row in summary_rows
+        }
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(output_path, "w", encoding="utf-8") as f:
+            for item_index, item in subset:
+                if item_index not in click_rates_by_item:
+                    raise ValueError(f"Missing click summary for item_index={item_index}")
+                row = copy.deepcopy(item)
+                ppied_scores = row.setdefault("ppied_scores", {})
+                if not isinstance(ppied_scores, dict):
+                    raise ValueError(
+                        f"Expected ppied_scores object for item_index={item_index}."
+                    )
+                ppied_scores["q4"] = click_rates_by_item[item_index]
                 f.write(json.dumps(row, ensure_ascii=False) + "\n")
 
     def copy_config_snapshot(self) -> None:

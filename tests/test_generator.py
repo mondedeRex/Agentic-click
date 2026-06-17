@@ -1,4 +1,6 @@
+import json
 import logging
+import shutil
 import sys
 import tempfile
 import unittest
@@ -212,6 +214,59 @@ class ItemToolCallSummaryTest(unittest.TestCase):
             generator.get_tool_summary_output_path(),
             Path("results/cached/generate_tool_summary.jsonl"),
         )
+        self.assertEqual(
+            generator.get_click_q4_data_output_path(),
+            Path("results/cached/generate_data_with_click_q4.jsonl"),
+        )
+
+    def test_write_click_q4_data_updates_only_selected_rows_q4(self) -> None:
+        temp_path = Path(".tmp") / "test_write_click_q4_data"
+        if temp_path.exists():
+            shutil.rmtree(temp_path)
+        temp_path.mkdir(parents=True)
+        self.addCleanup(lambda: shutil.rmtree(temp_path, ignore_errors=True))
+
+        generator = Generator(GeneratorConfig())
+        output_path = temp_path / "generate_data_with_click_q4.jsonl"
+        subset = [
+            (
+                5,
+                {
+                    "query": "q5",
+                    "response": "r5",
+                    "ppied_scores": {"q1": 1, "q2": 2, "q3": 3, "q4": 0.0},
+                    "other": "keep",
+                },
+            ),
+            (
+                9,
+                {
+                    "query": "q9",
+                    "response": "r9",
+                    "ppied_scores": {"q1": 10, "q4": 0.2},
+                },
+            ),
+        ]
+        summary_rows = [
+            {"item_index": 9, "tool_call_profile_percent": 0.33333},
+            {"item_index": 5, "tool_call_profile_percent": 0.66666},
+        ]
+
+        generator.write_click_q4_data(output_path, subset, summary_rows)
+
+        rows = [
+            json.loads(line)
+            for line in output_path.read_text(encoding="utf-8").splitlines()
+        ]
+        self.assertEqual(len(rows), 2)
+        self.assertEqual(rows[0]["query"], "q5")
+        self.assertEqual(
+            rows[0]["ppied_scores"],
+            {"q1": 1, "q2": 2, "q3": 3, "q4": 0.6667},
+        )
+        self.assertEqual(rows[0]["other"], "keep")
+        self.assertEqual(rows[1]["ppied_scores"], {"q1": 10, "q4": 0.3333})
+        self.assertEqual(subset[0][1]["ppied_scores"]["q4"], 0.0)
 
     def test_write_tool_summary_creates_missing_output_directory(self) -> None:
         generator = Generator(GeneratorConfig())
